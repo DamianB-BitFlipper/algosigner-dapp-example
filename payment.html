@@ -83,12 +83,10 @@
         </div>
         <div class="column">
           <pre><code class="js">const algodServer = 'https://testnet-algorand.api.purestake.io/ps2'
-const indexerServer = 'https://testnet-algorand.api.purestake.io/idx2'
 const token = { 'X-API-Key': 'YOUR API KEY HERE' }
 const port = '';
 
 algodClient = new algosdk.Algodv2(token, algodServer, port);
-indexerClient = new algosdk.Indexer(token, indexerServer, port);
 
 algodClient.healthCheck().do()
 .then(d => { 
@@ -198,46 +196,23 @@ algodClient.healthCheck().do()
       <div class="columns">
         <div class="column">
           <div class="field">
-            <p class="control has-icons-left">
-              <input class="input" id="from" placeholder="From">
-              <span class="icon is-small is-left">
+            <div class="control has-icons-left">
+              <div class="select is-fullwidth">
+                <select id="from">
+                  <option>Get accounts first</option>
+                </select>
+              </div>
+              <div class="icon is-small is-left">
                 <i class="fas fa-wallet"></i>
-              </span>
-            </p>
+              </div>
+            </div>
           </div>
 
           <div class="field">
             <p class="control has-icons-left">
-              <input class="input" id="to" placeholder="To">
+              <input class="input" id="app-index" placeholder="App Index">
               <span class="icon is-small is-left">
-                <i class="fas fa-share"></i>
-              </span>
-            </p>
-          </div>
-
-          <div class="field">
-            <p class="control has-icons-left">
-              <input class="input" id="amount" placeholder="&#181;Algos">
-              <span class="icon is-small is-left">
-                <i class="fas fa-coins"></i>
-              </span>
-            </p>
-          </div>
-
-          <div class="field">
-            <p class="control has-icons-left">
-              <input class="input" id="logic-sig" placeholder="Logic Signature">
-              <span class="icon is-small is-left">
-                <i class="fas fa-file-signature"></i>
-              </span>
-            </p>
-          </div>
-
-          <div class="field">
-            <p class="control has-icons-left">
-              <input class="input" id="lease" placeholder="Lease">
-              <span class="icon is-small is-left">
-                <i class="fas fa-sticky-note"></i>
+                <i class="fas fa-chevron-circle-right"></i>
               </span>
             </p>
           </div>
@@ -350,11 +325,50 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
   </section>
   <!-- /PENDING -->
 
+  <!-- READ STATE -->
+  <section class="section">
+    <div class="container">
+      <h1 class="title">
+        Read State
+        <a class="button is-small is-pulled-right" target="_blank" rel="noopener noreferrer"
+          href="https://github.com/PureStake/algosigner-dapp-example/blob/master/payment.html#L320">
+          <span class="icon is-small">
+            <i class="fab fa-github"></i>
+          </span>
+          <span>See code on GitHub</span>
+        </a>
+      </h1>
+      <p class="subtitle">
+        Read the global variable state of the smart contract
+      </p>
+
+      <div class="columns">
+        <div class="column">
+          <button class="button is-primary is-fullwidth" id="read">Read</button>
+          <pre class="mt-2"><code class="JSON" id="read-code">response</code></pre>
+        </div>
+        <div class="column">
+          <pre><code class="js"><b>AlgoSigner</b>.connect()
+.then((d) => {
+  ...
+})
+.catch((e) => {
+  console.error(e);
+});</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- /READ STATE -->
+
   <footer class="footer">
     <div class="content has-text-centered">
-      by <a target="_blank" rel="noopener noreferrer" href="https://purestake.com">
+      Demo app adapted from <a target="_blank" rel="noopener noreferrer" href="https://purestake.com">
         <img src="assets/ps-logo.png" height="28">
       </a>
+    </div>
+    <div class="content has-text-centered">
+      By: Damian Barabonkov, damianb[at]mit[dot]edu, <i class="fab fa-github"></i> @DamianB-BitFlipper
     </div>
   </footer>
 
@@ -362,15 +376,12 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
   <script>
     hljs.initHighlightingOnLoad();
 
-    // Some smart signature constants
-    const leaseDuration = 50;
-
     let txParamsJS = {};
     let tnAccounts = [];
     let signedTxs;
     let tx = {};
     let algodClient = {};
-    let indexerClient = {};
+    let appIndex = null;
 
     function connect() {
       let connectCodeElem = document.getElementById('connect-code');
@@ -459,69 +470,33 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
     function sign() {
       let signCodeElem = document.getElementById('sign-code');
 
-      const leaseFirstRound = txParamsJS.firstRound - (txParamsJS.firstRound % leaseDuration);
+      appIndex = +document.getElementById('app-index').value;
 
-      //  TODO
-      // const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      //   from: document.getElementById('from').value,
-      //   to: document.getElementById('to').value,
-      //   amount: +document.getElementById('amount').value,
-      //   suggestedParams: {
-      //       firstRound: leaseFirstRound,
-      //       lastRound: leaseFirstRound + leaseDuration,
-      //       lease: AlgoSigner.encoding.stringToByteArray(document.getElementById('lease').value),
-      //       ...txParamsJS,
-      //   }
-      // });
-
-      const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: "XEMQAYBJNX7XZSRSS6CEV6PMGD2Y7BLI46VFQZ2MULRMEGRTQUUS6ZXRFE",
-        to: "TJMHAAEFTWVZNA2O52AA57BWVCJOBSEIU2OEWNWADVM5F5Y2DRJDWMDGRQ",
-        amount: +2000000,
-        suggestedParams: {
-            firstRound: leaseFirstRound,
-            lastRound: leaseFirstRound + leaseDuration,
-            lease: AlgoSigner.encoding.stringToByteArray("cGFzc3dvcmRwYXNzd29yZHBhc3N3b3JkcGFzc3dvcmQ="),
-            ...txParamsJS,
-        }
+      const txn = algosdk.makeApplicationNoOpTxnFromObject({
+        from: document.getElementById('from').value,
+        appIndex: appIndex,
+        suggestedParams: {...txParamsJS}
       });
 
-      try {
-          // const lsigBuffer = AlgoSigner.encoding.stringToByteArray("gqFsxIEFIAEyMRCBARIxAYHoBw4QMQeAIA+h7OXH6hwjdenfvWTTXl9xogJQV7KBfV4+6+0/MzfOEhAxCIGAiXoSEDECIhiBABIxBCIxAggSEDEGgCBwYXNzd29yZHBhc3N3b3JkcGFzc3dvcmRwYXNzd29yZBIQEDEJMgMSMSAyAxIQEEOjc2lnxECODxr3c2JD0aSQwh7sAsO7bbUIprswGtnay5nm8h5pPZHyETw5g4gqH49fGPbC+/GffCQ8peRKfO+Vrt4pe8wF");
+      // Use the AlgoSigner encoding library to make the transactions base64
+      let txn_b64 = AlgoSigner.encoding.msgpackToBase64(txn.toByte());
 
-          const lsigBuffer = Uint8Array.from(atob("gqFsxIEFIAEyMRCBARIxAYHoBw4QMQeAIA+h7OXH6hwjdenfvWTTXl9xogJQV7KBfV4+6+0/MzfOEhAxCIGAiXoSEDECIhiBABIxBCIxAggSEDEGgCBwYXNzd29yZHBhc3N3b3JkcGFzc3dvcmRwYXNzd29yZBIQEDEJMgMSMSAyAxIQEEOjc2lnxECODxr3c2JD0aSQwh7sAsO7bbUIprswGtnay5nm8h5pPZHyETw5g4gqH49fGPbC+/GffCQ8peRKfO+Vrt4pe8wF"), c => c.charCodeAt(0))
-
-          console.log(lsigBuffer);
-
-          // Sign with the `algosdk` since AlgoSigner does not support logic signatures
-          const d = algosdk.signLogicSigTransactionObject(txn, algosdk.logicSigFromByte(lsigBuffer));
-
-          signedTxs = [d];
-          signCodeElem.innerHTML = JSON.stringify(signedTxs, null, 2);
-      } catch(e) {
-          console.error(e);
-          signCodeElem.innerHTML = JSON.stringify(e, null, 2);
-      } finally {
-          hljs.highlightBlock(signCodeElem);
-      }
-
-      // .then((d) => {
-      //   signedTxs = [d];
-      //   signCodeElem.innerHTML = JSON.stringify(signedTxs, null, 2);
-      // })
-      // .catch((e) => {
-      //   console.error(e);
-      //   signCodeElem.innerHTML = JSON.stringify(e, null, 2);
-      // })
-      // .finally(() => {
-      //   hljs.highlightBlock(signCodeElem);
-      // });
+      AlgoSigner.signTxn([{txn: txn_b64}])
+      .then((d) => {
+        signedTxs = d;
+        signCodeElem.innerHTML = JSON.stringify(d, null, 2);
+      })
+      .catch((e) => {
+        console.error(e);
+        signCodeElem.innerHTML = JSON.stringify(e, null, 2);
+      })
+      .finally(() => {
+        hljs.highlightBlock(signCodeElem);
+      });
     }
 
     function send() {
       let sendCodeElem = document.getElementById('send-code');
-
-      console.log("ALRIGHT BC");
 
       // Sending first transaction only for demo purposes
       AlgoSigner.send({
@@ -529,8 +504,6 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
         tx: signedTxs[0].blob 
       })
       .then((d) => {
-          console.log("LIEEEE");
-
         sendCodeElem.innerHTML = JSON.stringify(d, null, 2);
         tx = d;
       })
@@ -559,6 +532,23 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
       });
     }
 
+    function read() {
+      let readCodeElem = document.getElementById('read-code');
+
+      algodClient.getApplicationByID(appIndex).do()
+      .then((d) => {
+        const globalState = d['params']['global-state'];
+        readCodeElem.innerHTML = JSON.stringify(globalState, null, 2);
+      })
+      .catch((e) => {
+        console.error(e);
+        readCodeElem.innerHTML = JSON.stringify(e, null, 2);
+      })
+      .finally(() => {
+        hljs.highlightBlock(readCodeElem);
+      });
+    }
+
     document.getElementById('connect').addEventListener('click', connect);
     document.getElementById('sdksetup').addEventListener('click', sdkSetup);
     document.getElementById('accounts').addEventListener('click', accounts);
@@ -566,6 +556,7 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
     document.getElementById('sign').addEventListener('click', sign);
     document.getElementById('send').addEventListener('click', send);
     document.getElementById('pending').addEventListener('click', pending);
+    document.getElementById('read').addEventListener('click', read);
   </script>
   <script src="https://unpkg.com/algosdk@latest"></script>
   <script src="./tx-test/common/helper.js"></script>
