@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AlgoSigner dApp | Payment</title>
+  <title>WalletConnect Example DApp</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
   <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.2/build/styles/tomorrow.min.css">
@@ -16,12 +16,11 @@
   <nav class="navbar" role="navigation" aria-label="main navigation">
     <div class="navbar-menu">
       <div class="navbar-start">
-        <a class="navbar-item"><b>AlgoSigner Example</b></a>
-        <a class="navbar-item" href="asset-create.html">WalletConnect Example</a>
+        <a class="navbar-item" href="algosigner.html">AlgoSigner Example</a>
+        <a class="navbar-item"><u>WalletConnect Example</u></a>
       </div>
     </div>
   </nav>
-
 
   <!-- CONNECT -->
   <section class="section">
@@ -29,7 +28,7 @@
       <h1 class="title">
         Connect
         <a class="button is-small is-pulled-right" target="_blank" rel="noopener noreferrer"
-          href="https://github.com/PureStake/algosigner-dapp-example/blob/master/payment.html#L320">
+          href="https://github.com/DamianB-BitFlipper/algosigner-dapp-example/blob/master/walletconnect.html#L1">
           <span class="icon is-small">
             <i class="fab fa-github"></i>
           </span>
@@ -37,7 +36,7 @@
         </a>
       </h1>
       <p class="subtitle">
-        Connect to AlgoSigner
+        Connect to the Algorand smartphone wallet using WalletConnect
       </p>
 
       <div class="columns">
@@ -46,13 +45,18 @@
           <pre class="mt-2"><code class="JSON" id="connect-code">response</code></pre>
         </div>
         <div class="column">
-          <pre><code class="js"><b>AlgoSigner</b>.connect()
-.then((d) => {
+          <pre><code class="js">// Create a walletConnector
+<b>walletConnector</b> = new <b>WalletConnect</b>.default({
+  bridge: "https://bridge.walletconnect.org", // Required
+  qrcodeModal: WalletConnectQRCodeModal.default,
+});
+
+// Check if this is a new connection
+if (!<b>walletConnector</b>.connected) {
+  // Create new session
+  <b>walletConnector</b>.createSession();
   ...
-})
-.catch((e) => {
-  console.error(e);
-});</code></pre>
+}</code></pre>
         </div>
       </div>
     </div>
@@ -65,7 +69,7 @@
       <h1 class="title">
         SDK Setup
         <a class="button is-small is-pulled-right" target="_blank" rel="noopener noreferrer"
-          href="https://github.com/PureStake/algosigner-dapp-example/blob/master/payment.html#L320">
+          href="https://github.com/DamianB-BitFlipper/algosigner-dapp-example/blob/master/walletconnect.html#L1">
           <span class="icon is-small">
             <i class="fab fa-github"></i>
           </span>
@@ -94,8 +98,7 @@ algodClient.healthCheck().do()
 })
 .catch(e => { 
   console.error(e); 
-});
-</code></pre>
+});</code></pre>
         </div>
       </div>
     </div>
@@ -116,7 +119,7 @@ algodClient.healthCheck().do()
         </a>
       </h1>
       <p class="subtitle">
-        Gets the users TestNet accounts
+        Gets the TestNet accounts in this wallet
       </p>
 
       <div class="columns">
@@ -125,15 +128,10 @@ algodClient.healthCheck().do()
           <pre class="mt-2"><code class="JSON" id="accounts-code">response</code></pre>
         </div>
         <div class="column">
-          <pre><code class="js"><b>AlgoSigner</b>.accounts({
-  ledger: 'TestNet'
-})
-.then((d) => {
-  accounts = d;
-})
-.catch((e) => {
-  console.error(e);
-});</code></pre>
+          <pre><code class="js">if (<b>walletConnector</b>.connected) {
+  const { accounts } = <b>walletConnector</b>;
+  ...
+}</code></pre>
         </div>
       </div>
     </div>
@@ -165,7 +163,8 @@ algodClient.healthCheck().do()
         <div class="column">
           <pre><code class="js">algodClient.getTransactionParams().do()
 .then((d) => {
-  txParamsJS = d;
+  suggestedTxParams = d;
+  ...
 })
 .catch((e) => {
   console.error(e);
@@ -180,7 +179,7 @@ algodClient.healthCheck().do()
   <section class="section">
     <div class="container">
       <h1 class="title">
-        Sign Pay Transaction
+        Sign Application Call Transaction
         <a class="button is-small is-pulled-right" target="_blank" rel="noopener noreferrer"
           href="https://github.com/PureStake/algosigner-dapp-example/blob/master/payment.html#L385">
           <span class="icon is-small">
@@ -190,7 +189,7 @@ algodClient.healthCheck().do()
         </a>
       </h1>
       <p class="subtitle">
-        Ask the user to sign a payment transaction using AlgoSigner's Sign method
+        Ask the user to sign a smart contract application call transaction using the Algorand wallet
       </p>
 
       <div class="columns">
@@ -221,29 +220,22 @@ algodClient.healthCheck().do()
         </div>
 
         <div class="column">
-          <pre><code class="js">const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+          <pre><code class="js">const txn = algosdk.makeApplicationNoOpTxnFromObject({
   from: document.getElementById('from').value,
-  to: document.getElementById('to').value,
-  amount: +document.getElementById('amount').value,
-  suggestedParams: {
-      // TODO: Make this work correctly
-      firstRound: 1000,
-      lastRound: 1050,
-      lease: document.getElementById('lease').value,
-      ...txParamsJS,
-  }
+  appIndex: appIndex,
+  suggestedParams: {...suggestedTxParams}
 });
+        
+txns_b64 = [
+  {
+    txn: arrayBufferToBase64(algosdk.encodeUnsignedTransaction(txn)),
+    message: 'Invoke smart contract call to add one', // Description of transaction to be signed
+  },
+];
 
-// Use the AlgoSigner encoding library to make the transactions base64
-let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
-
-<b>AlgoSigner</b>.signTxn([{txn: txn_b64}])
-.then((d) => {
-  signedTxs = d;
-})
-.catch((e) => {
-    console.error(e);
-});</code></pre>
+const requestParams = [txns_b64];
+const request = JsonRpcUtils.formatJsonRpcRequest("algo_signTxn", requestParams);
+signedTxns = await <b>walletConnector</b>.sendCustomRequest(request);</code></pre>
         </div>
       </div>
     </div>
@@ -273,12 +265,10 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
           <pre class="mt-2"><code class="JSON" id="send-code">response</code></pre>
         </div>
         <div class="column">
-          <pre><code class="js"><b>AlgoSigner</b>.send({
-  ledger: 'TestNet',
-  tx: signedTxs[0].blob
-})
+          <pre><code class="js">algodClient.sendRawTransaction(new Uint8Array(signedTxns[0])).do()
 .then((d) => {
   tx = d;
+  ...
 })
 .catch((e) => {
   console.error(e);
@@ -314,7 +304,8 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
         <div class="column">
           <pre><code class="js">algodClient.pendingTransactionInformation(tx.txId).do()
 .then((d) => {
-  console.log(d);
+  txStatus = d;
+  ...
 })
 .catch((e) => {
   console.error(e);
@@ -348,8 +339,9 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
           <pre class="mt-2"><code class="JSON" id="read-code">response</code></pre>
         </div>
         <div class="column">
-          <pre><code class="js"><b>AlgoSigner</b>.connect()
+          <pre><code class="js">algodClient.getApplicationByID(appIndex).do()
 .then((d) => {
+  globalState = d['params']['global-state'];
   ...
 })
 .catch((e) => {
@@ -384,13 +376,8 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
           <pre class="mt-2"><code class="JSON" id="disconnect-code">response</code></pre>
         </div>
         <div class="column">
-          <pre><code class="js"><b>AlgoSigner</b>.connect()
-.then((d) => {
-  ...
-})
-.catch((e) => {
-  console.error(e);
-});</code></pre>
+          <pre><code class="js">// Kill the current `walletConnector` session
+<b>walletConnector</b>.killSession();</code></pre>
         </div>
       </div>
     </div>
@@ -412,7 +399,7 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
   <script>
     hljs.initHighlightingOnLoad();
 
-    let txParamsJS = {};
+    let suggestedTxParams = {};
     let tnAccounts = [];
     let tx = {};
     let signedTxns = [];
@@ -429,25 +416,46 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
             qrcodeModal: WalletConnectQRCodeModal.default,
         });
 
-        // Check if connection is already established
+        // Check if this is a new connection
         if (!walletConnector.connected) {
-            // create new session
+            // Create new session
             walletConnector.createSession();
+
+            connectCodeElem.innerHTML = JSON.stringify("Initiating connection to Algorand wallet", null, 2);
+        } else {
+            connectCodeElem.innerHTML = JSON.stringify("Already connected to Algorand wallet", null, 2);
         }
+
+        hljs.highlightBlock(connectCodeElem);
+
+        //
+        // All of the event handlers
+        //
 
         // Subscribe to connection events
         walletConnector.on("connect", (error, payload) => {
             if (error) {
-                throw error;
+                console.error(error);
+                connectCodeElem.innerHTML = JSON.stringify(error, null, 2);
+
+                hljs.highlightBlock(connectCodeElem);
+                return;
             }
 
             // Get provided accounts
             const { accounts } = payload.params[0];
+
+            connectCodeElem.innerHTML = JSON.stringify("Connected to Algorand wallet!", null, 2);
+            hljs.highlightBlock(connectCodeElem);
         });
 
         walletConnector.on("session_update", (error, payload) => {
             if (error) {
-                throw error;
+                console.error(error);
+                connectCodeElem.innerHTML = JSON.stringify(error, null, 2);
+
+                hljs.highlightBlock(connectCodeElem);
+                return;
             }
 
             // Get updated accounts 
@@ -456,22 +464,16 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
 
         walletConnector.on("disconnect", (error, payload) => {
             if (error) {
-                throw error;
+                console.error(error);
+                connectCodeElem.innerHTML = JSON.stringify(error, null, 2);
+
+                hljs.highlightBlock(connectCodeElem);
+                return;
             }
+
+            connectCodeElem.innerHTML = JSON.stringify("Disconnected from Algorand wallet!", null, 2);
+            hljs.highlightBlock(connectCodeElem);
         });
-
-
-      // AlgoSigner.connect()
-      // .then((d) => {
-      //   connectCodeElem.innerHTML = JSON.stringify("Connected Successfully!", null, 2);
-      // })
-      // .catch((e) => {
-      //   console.error(e);
-      //   connectCodeElem.innerHTML = JSON.stringify(e, null, 2);
-      // })
-      // .finally(() => {
-      //   hljs.highlightBlock(connectCodeElem);
-      // });
     }
 
     function sdkSetup() {
@@ -515,30 +517,7 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
             }
         }
 
-        // AlgoSigner.accounts({
-        //   ledger: 'TestNet'
-        // })
-        // .then((d) => {
-        //   accountsCodeElem.innerHTML = JSON.stringify(d, null, 2);
-        //   tnAccounts = d;
-
-        //   // Append accounts to account select
-        //   let select = document.getElementById('from');
-        //   select.textContent = '';
-        //   for (var i = d.length - 1; i >= 0; i--) {
-        //     let option = document.createElement('option');
-        //     option.text = d[i].address;
-        //     option.value = d[i].address;
-        //     select.appendChild(option);
-        //   }
-        // })
-        // .catch((e) => {
-        //   console.error(e);
-        //   accountsCodeElem.innerHTML = JSON.stringify(e, null, 2);
-        // })
-        // .finally(() => {
-        //   hljs.highlightBlock(accountsCodeElem);
-        // });
+        hljs.highlightBlock(accountsCodeElem);
     }
 
     function params() {
@@ -546,8 +525,8 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
 
         algodClient.getTransactionParams().do()
             .then((d) => {
-                txParamsJS = d;
-                paramsCodeElem.innerHTML = JSON.stringify(txParamsJS, null, 2);
+                suggestedTxParams = d;
+                paramsCodeElem.innerHTML = JSON.stringify(suggestedTxParams, null, 2);
             })      
             .catch((e) => {
                 console.error(e);
@@ -566,9 +545,8 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
         const txn = algosdk.makeApplicationNoOpTxnFromObject({
             from: document.getElementById('from').value,
             appIndex: appIndex,
-            suggestedParams: {...txParamsJS}
+            suggestedParams: {...suggestedTxParams}
         });
-
         
         txns_b64 = [
             {
@@ -584,7 +562,8 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
         const request = JsonRpcUtils.formatJsonRpcRequest("algo_signTxn", requestParams);
         signedTxns = await walletConnector.sendCustomRequest(request);
 
-        signCodeElem.innerHTML = JSON.stringify(signedTxns, null, 2);
+        signCodeElem.innerHTML = JSON.stringify(signedTxns, toJsonReplace, 2);
+        hljs.highlightBlock(signCodeElem);
 
         // Use the AlgoSigner encoding library to make the transactions base64
         // let txn_b64 = AlgoSigner.encoding.msgpackToBase64(txn.toByte());
@@ -599,7 +578,7 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
         //   signCodeElem.innerHTML = JSON.stringify(e, null, 2);
         // })
         // .finally(() => {
-        //   hljs.highlightBlock(signCodeElem);
+        //   
         // });
     }
 
@@ -683,6 +662,7 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
         walletConnector.killSession();
 
         disconnectCodeElem.innerHTML = JSON.stringify("Session Terminated", null, 2); 
+        hljs.highlightBlock(disconnectCodeElem);
     }
 
     document.getElementById('connect').addEventListener('click', connect);
