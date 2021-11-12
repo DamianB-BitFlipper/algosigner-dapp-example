@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AlgoSigner dApp | Payment</title>
+  <title>AlgoSigner Example DApp</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
   <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.2/build/styles/tomorrow.min.css">
@@ -29,7 +29,7 @@
       <h1 class="title">
         Connect
         <a class="button is-small is-pulled-right" target="_blank" rel="noopener noreferrer"
-          href="https://github.com/PureStake/algosigner-dapp-example/blob/master/payment.html#L320">
+          href="https://github.com/DamianB-BitFlipper/algosigner-dapp-example/blob/master/algosigner.html#L386">
           <span class="icon is-small">
             <i class="fab fa-github"></i>
           </span>
@@ -65,7 +65,7 @@
       <h1 class="title">
         SDK Setup
         <a class="button is-small is-pulled-right" target="_blank" rel="noopener noreferrer"
-          href="https://github.com/PureStake/algosigner-dapp-example/blob/master/payment.html#L320">
+          href="https://github.com/DamianB-BitFlipper/algosigner-dapp-example/blob/master/algosigner.html#L402">
           <span class="icon is-small">
             <i class="fab fa-github"></i>
           </span>
@@ -73,7 +73,7 @@
         </a>
       </h1>
       <p class="subtitle">
-        Setup client for algosdk
+        Setup a client for algosdk
       </p>
 
       <div class="columns">
@@ -108,7 +108,7 @@ algodClient.healthCheck().do()
       <h1 class="title">
         Get TestNet Accounts
         <a class="button is-small is-pulled-right" target="_blank" rel="noopener noreferrer"
-          href="https://github.com/PureStake/algosigner-dapp-example/blob/master/payment.html#L336">
+          href="https://github.com/DamianB-BitFlipper/algosigner-dapp-example/blob/master/algosigner.html#L424">
           <span class="icon is-small">
             <i class="fab fa-github"></i>
           </span>
@@ -116,7 +116,7 @@ algodClient.healthCheck().do()
         </a>
       </h1>
       <p class="subtitle">
-        Gets the users TestNet accounts
+        Gets the TestNet accounts in this wallet
       </p>
 
       <div class="columns">
@@ -130,6 +130,7 @@ algodClient.healthCheck().do()
 })
 .then((d) => {
   accounts = d;
+  ...
 })
 .catch((e) => {
   console.error(e);
@@ -146,7 +147,7 @@ algodClient.healthCheck().do()
       <h1 class="title">
         Get Params
         <a class="button is-small is-pulled-right" target="_blank" rel="noopener noreferrer"
-          href="https://github.com/PureStake/algosigner-dapp-example/blob/master/payment.html#L365">
+          href="https://github.com/DamianB-BitFlipper/algosigner-dapp-example/blob/master/algosigner.html#L453">
           <span class="icon is-small">
             <i class="fab fa-github"></i>
           </span>
@@ -165,7 +166,8 @@ algodClient.healthCheck().do()
         <div class="column">
           <pre><code class="js">algodClient.getTransactionParams().do()
 .then((d) => {
-  txParamsJS = d;
+  suggestedTxParams = d;
+  ...
 })
 .catch((e) => {
   console.error(e);
@@ -180,9 +182,9 @@ algodClient.healthCheck().do()
   <section class="section">
     <div class="container">
       <h1 class="title">
-        Sign Pay Transaction
+        Sign Application Call Transaction
         <a class="button is-small is-pulled-right" target="_blank" rel="noopener noreferrer"
-          href="https://github.com/PureStake/algosigner-dapp-example/blob/master/payment.html#L385">
+          href="https://github.com/DamianB-BitFlipper/algosigner-dapp-example/blob/master/algosigner.html#L470">
           <span class="icon is-small">
             <i class="fab fa-github"></i>
           </span>
@@ -190,7 +192,7 @@ algodClient.healthCheck().do()
         </a>
       </h1>
       <p class="subtitle">
-        Ask the user to sign a payment transaction using AlgoSigner's Sign method
+        Ask the user to sign a smart contract application call transaction using AlgoSigner's Sign method
       </p>
 
       <div class="columns">
@@ -221,18 +223,11 @@ algodClient.healthCheck().do()
         </div>
 
         <div class="column">
-          <pre><code class="js">const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-  from: document.getElementById('from').value,
-  to: document.getElementById('to').value,
-  amount: +document.getElementById('amount').value,
-  suggestedParams: {
-      // TODO: Make this work correctly
-      firstRound: 1000,
-      lastRound: 1050,
-      lease: document.getElementById('lease').value,
-      ...txParamsJS,
-  }
-});
+          <pre><code class="js">const txn = algosdk.makeApplicationNoOpTxnFromObject({
+        from: document.getElementById('from').value,
+        appIndex: appIndex,
+        suggestedParams: {...suggestedTxParams}
+      });
 
 // Use the AlgoSigner encoding library to make the transactions base64
 let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
@@ -240,9 +235,10 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
 <b>AlgoSigner</b>.signTxn([{txn: txn_b64}])
 .then((d) => {
   signedTxs = d;
+  ...
 })
 .catch((e) => {
-    console.error(e);
+  console.error(e);
 });</code></pre>
         </div>
       </div>
@@ -256,7 +252,7 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
       <h1 class="title">
         Send Signed Transaction
         <a class="button is-small is-pulled-right" target="_blank" rel="noopener noreferrer"
-          href="https://github.com/PureStake/algosigner-dapp-example/blob/master/payment.html#L413">
+          href="https://github.com/DamianB-BitFlipper/algosigner-dapp-example/blob/master/algosigner.html#L498">
           <span class="icon is-small">
             <i class="fab fa-github"></i>
           </span>
@@ -279,6 +275,7 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
 })
 .then((d) => {
   tx = d;
+  ...
 })
 .catch((e) => {
   console.error(e);
@@ -293,9 +290,9 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
   <section class="section">
     <div class="container">
       <h1 class="title">
-        Check pending transaction
+        Check Pending Transaction
         <a class="button is-small is-pulled-right" target="_blank" rel="noopener noreferrer"
-          href="https://github.com/PureStake/algosigner-dapp-example/blob/master/payment.html#L433">
+          href="https://github.com/DamianB-BitFlipper/algosigner-dapp-example/blob/master/algosigner.html#L519">
           <span class="icon is-small">
             <i class="fab fa-github"></i>
           </span>
@@ -314,7 +311,8 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
         <div class="column">
           <pre><code class="js">algodClient.pendingTransactionInformation(tx.txId).do()
 .then((d) => {
-  console.log(d);
+  txStatus = d;
+  ...
 })
 .catch((e) => {
   console.error(e);
@@ -331,7 +329,7 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
       <h1 class="title">
         Read State
         <a class="button is-small is-pulled-right" target="_blank" rel="noopener noreferrer"
-          href="https://github.com/PureStake/algosigner-dapp-example/blob/master/payment.html#L320">
+          href="https://github.com/DamianB-BitFlipper/algosigner-dapp-example/blob/master/algosigner.html#L535">
           <span class="icon is-small">
             <i class="fab fa-github"></i>
           </span>
@@ -348,8 +346,9 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
           <pre class="mt-2"><code class="JSON" id="read-code">response</code></pre>
         </div>
         <div class="column">
-          <pre><code class="js"><b>AlgoSigner</b>.connect()
+          <pre><code class="js">algodClient.getApplicationByID(appIndex).do()
 .then((d) => {
+  globalState = d['params']['global-state'];
   ...
 })
 .catch((e) => {
@@ -376,7 +375,7 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
   <script>
     hljs.initHighlightingOnLoad();
 
-    let txParamsJS = {};
+    let suggestedTxParams = {};
     let tnAccounts = [];
     let signedTxs;
     let tx = {};
@@ -455,8 +454,8 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
 
       algodClient.getTransactionParams().do()
       .then((d) => {
-        txParamsJS = d;
-        paramsCodeElem.innerHTML = JSON.stringify(txParamsJS, null, 2);
+        suggestedTxParams = d;
+        paramsCodeElem.innerHTML = JSON.stringify(suggestedTxParams, null, 2);
       })      
       .catch((e) => {
         console.error(e);
@@ -475,7 +474,7 @@ let txn_b64 = <b>AlgoSigner</b>.encoding.msgpackToBase64(txn.toByte());
       const txn = algosdk.makeApplicationNoOpTxnFromObject({
         from: document.getElementById('from').value,
         appIndex: appIndex,
-        suggestedParams: {...txParamsJS}
+        suggestedParams: {...suggestedTxParams}
       });
 
       // Use the AlgoSigner encoding library to make the transactions base64
