@@ -410,7 +410,7 @@ signedTxns = await <b>walletConnector</b>.sendCustomRequest(request);</code></pr
     function connect() {
         let connectCodeElem = document.getElementById('connect-code');
 
-        // Create a walletConnector
+        // Create a `walletConnector`
         walletConnector = new WalletConnect.default({
             bridge: "https://bridge.walletconnect.org", // Required
             qrcodeModal: WalletConnectQRCodeModal.default,

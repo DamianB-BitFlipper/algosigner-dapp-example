@@ -223,7 +223,7 @@ algodClient.healthCheck().do()
         <div class="column">
           <pre><code class="js">const txn = algosdk.makeApplicationNoOpTxnFromObject({
         from: document.getElementById('from').value,
-        appIndex: appIndex,
+        appIndex: +document.getElementById('app-index').value,
         suggestedParams: {...suggestedTxParams}
       });
 
