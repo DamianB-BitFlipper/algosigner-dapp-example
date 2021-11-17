@@ -86,9 +86,9 @@ if (!<b>walletConnector</b>.connected) {
           <pre class="mt-2"><code class="JSON" id="sdk-setup">response</code></pre>
         </div>
         <div class="column">
-          <pre><code class="js">const algodServer = 'https://testnet-algorand.api.purestake.io/ps2'
-const token = { 'X-API-Key': 'YOUR API KEY HERE' }
-const port = '';
+          <pre><code class="js">const algodServer = 'http://localhost';
+const token = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+const port = '4001';
 
 algodClient = new algosdk.Algodv2(token, algodServer, port);
 
@@ -479,9 +479,9 @@ signedTxns = await <b>walletConnector</b>.sendCustomRequest(request);</code></pr
     function sdkSetup() {
         let sdkSetupCodeElem = document.getElementById('sdk-setup');
 
-        const server = 'https://testnet-algorand.api.purestake.io/ps2';
-        const token = { 'X-API-Key': 'B3SU4KcVKi94Jap2VXkK83xx38bsv95K5UZm2lab' }
-        const port = '';
+        const server = 'http://localhost';
+        const token = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+        const port = '4001';
 
         algodClient = new algosdk.Algodv2(token, server, port);
 
@@ -564,22 +564,6 @@ signedTxns = await <b>walletConnector</b>.sendCustomRequest(request);</code></pr
 
         signCodeElem.innerHTML = JSON.stringify(signedTxns, toJsonReplace, 2);
         hljs.highlightBlock(signCodeElem);
-
-        // Use the AlgoSigner encoding library to make the transactions base64
-        // let txn_b64 = AlgoSigner.encoding.msgpackToBase64(txn.toByte());
-
-        // AlgoSigner.signTxn([{txn: txn_b64}])
-        // .then((d) => {
-        //   signedTxs = d;
-        //   signCodeElem.innerHTML = JSON.stringify(d, null, 2);
-        // })
-        // .catch((e) => {
-        //   console.error(e);
-        //   signCodeElem.innerHTML = JSON.stringify(e, null, 2);
-        // })
-        // .finally(() => {
-        //   
-        // });
     }
 
     function send() {
@@ -597,29 +581,6 @@ signedTxns = await <b>walletConnector</b>.sendCustomRequest(request);</code></pr
         .finally(() => {
           hljs.highlightBlock(sendCodeElem);
         });
-
-        // const decodedResult = result.map(element => {
-        //     return element ? base64ToArrayBuffer(element) : null;
-        // });
-
-        // console.log(decodedResult);
-
-        // Sending first transaction only for demo purposes
-        // AlgoSigner.send({
-        //   ledger: 'TestNet',
-        //   tx: signedTxs[0].blob 
-        // })
-        // .then((d) => {
-        //   sendCodeElem.innerHTML = JSON.stringify(d, null, 2);
-        //   tx = d;
-        // })
-        // .catch((e) => {
-        //   console.error(e);
-        //   sendCodeElem.innerHTML = JSON.stringify(e, null, 2);
-        // })
-        // .finally(() => {
-        //   hljs.highlightBlock(sendCodeElem);
-        // });
     }
 
     function pending() {
